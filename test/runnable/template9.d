@@ -4210,6 +4210,35 @@ void test13417()
 }
 
 /******************************************/
+// 13714
+
+struct JSONValue13714
+{
+    this(T)(T arg)
+    {
+    }
+    this(T : JSONValue13714)(inout T arg) inout
+    {
+        //store = arg.store;
+    }
+
+    void opAssign(T)(T arg)
+    {
+    }
+}
+
+void test13714()
+{
+    enum DummyStringEnum
+    {
+        foo = "bar"
+    }
+
+    JSONValue13714[string] aa;
+    aa["A"] = DummyStringEnum.foo;
+}
+
+/******************************************/
 
 int main()
 {
