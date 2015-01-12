@@ -7864,6 +7864,8 @@ Type *TypeStruct::semantic(Loc loc, Scope *sc)
     // instead, parent should be set correctly
     assert(sym->parent);
 
+    if (sym->type->ty == Terror)
+        return Type::terror;
     return merge();
 }
 
@@ -8422,6 +8424,8 @@ Type *TypeClass::semantic(Loc loc, Scope *sc)
     // instead, parent should be set correctly
     assert(sym->parent);
 
+    if (sym->type->ty == Terror)
+        return Type::terror;
     return merge();
 }
 
