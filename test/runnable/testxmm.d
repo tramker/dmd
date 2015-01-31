@@ -1193,6 +1193,22 @@ void test9449()
 
 /*****************************************/
 
+void foo13988(double[] arr)
+{
+    static ulong repr(double d) { return *cast(ulong*)&d; }
+    foreach (x; arr)
+	assert(repr(arr[0]) == *cast(ulong*)&(arr[0]));
+}
+
+
+void test13988()
+{
+    double[] arr = [3.0];
+    foo13988(arr);
+}
+
+/*****************************************/
+
 int main()
 {
     test1();
@@ -1222,6 +1238,7 @@ int main()
     test9910();
     test12852();
     test9449();
+    test13988();
 
     return 0;
 }
