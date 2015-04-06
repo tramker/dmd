@@ -48,6 +48,7 @@ enum PROT;
 #define CSXlabel        0x10    // seen a label
 #define CSXreturn       0x20    // seen a return statement
 #define CSXany_ctor     0x40    // either this() or super() was called
+#define CSXhalt         0x80    // assert(0)
 
 #define SCOPEctor           0x0001  // constructor type
 #define SCOPEstaticif       0x0002  // inside static if
