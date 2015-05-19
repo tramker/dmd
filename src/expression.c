@@ -10660,13 +10660,17 @@ Expression *IndexExp::semantic(Scope *sc)
     e2 = e2->semantic(sc);
     e2 = resolveProperties(sc, e2);
     if (t1->ty == Ttuple) sc = sc->endCTFE();
-    if (e2->type == Type::terror)
-        return new ErrorExp();
-    if (e2->type->ty == Ttuple && ((TupleExp *)e2)->exps->dim == 1) // bug 4444 fix
-        e2 = (*((TupleExp *)e2)->exps)[0];
+    if (e2->op == TOKtuple)
+    {
+        TupleExp *te = (TupleExp *)e2;
+        if (te->exps && te->exps->dim == 1)
+            e2 = Expression::combine(te->e0, (*te->exps)[0]);  // bug 4444 fix
+    }
 
     if (t1->ty == Tsarray || t1->ty == Tarray || t1->ty == Ttuple)
         sc = sc->pop();
+    if (e2->type == Type::terror)
+        return new ErrorExp();
 
     switch (t1->ty)
     {
