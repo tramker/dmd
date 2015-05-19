@@ -1620,6 +1620,8 @@ void FuncDeclaration::semantic3(Scope *sc)
             if (!fbody)
                 fbody = new CompoundStatement(Loc(), new Statements());
 
+            assert(type == f);
+
             if (inferRetType)
             {
                 // If no return type inferred yet, then infer a void
@@ -1636,7 +1638,8 @@ void FuncDeclaration::semantic3(Scope *sc)
                 nw.sc = sc2;
                 fbody->accept(&nw);
             }
-            assert(type == f);
+            if (retStyle(f) != RETstack)
+                nrvo_can = 0;
 
             if (isStaticCtorDeclaration())
             {
