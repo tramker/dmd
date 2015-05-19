@@ -569,16 +569,6 @@ void TemplateDeclaration::semantic(Scope *sc)
             Type::rtinfo = this;
     }
 
-    if (Module *m = sc->module) // should use getModule() instead?
-    {
-        // Generate these functions as they may be used
-        // when template is instantiated in other modules
-        // even if assertions or bounds checking are disabled in this module
-        m->toModuleArray();
-        m->toModuleAssert();
-        m->toModuleUnittest();
-    }
-
     /* Remember Scope for later instantiations, but make
      * a copy since attributes can change.
      */
@@ -6194,6 +6184,16 @@ void TemplateInstance::semantic(Scope *sc, Expressions *fargs)
     }
     TemplateDeclaration *tempdecl = this->tempdecl->isTemplateDeclaration();
     assert(tempdecl);
+
+    if (Module *m = tempdecl->scope->module) // should use getModule() instead?
+    {
+        // Generate these functions as they may be used
+        // when template is instantiated in other modules
+        // even if assertions or bounds checking are disabled in this module
+        m->toModuleArray();
+        m->toModuleAssert();
+        m->toModuleUnittest();
+    }
 
     // If tempdecl is a mixin, disallow it
     if (tempdecl->ismixin)
