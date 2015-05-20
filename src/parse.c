@@ -3539,7 +3539,7 @@ L2:
         else if (t != tfirst)
             error("multiple declarations must have the same type, not %s and %s",
                 tfirst->toChars(), t->toChars());
-        bool isThis = (t->ty == Tident && ((TypeIdentifier *)t)->ident == Id::This);
+        bool isThis = (t->ty == Tident && ((TypeIdentifier *)t)->ident == Id::This && token.value == TOKassign);
         if (!isThis && !ident)
             error("no identifier for declarator %s", t->toChars());
 
