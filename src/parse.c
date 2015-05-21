@@ -148,7 +148,7 @@ Dsymbols *Parser::parseModule()
 
         if (token.value != TOKidentifier)
         {
-            error("Identifier expected following module");
+            error("identifier expected following module");
             goto Lerr;
         }
         else
@@ -165,7 +165,7 @@ Dsymbols *Parser::parseModule()
                 nextToken();
                 if (token.value != TOKidentifier)
                 {
-                    error("Identifier expected following package");
+                    error("identifier expected following package");
                     goto Lerr;
                 }
                 id = token.ident;
@@ -382,13 +382,13 @@ Dsymbols *Parser::parseDeclDefs(int once, Dsymbol **pLastDecl, PrefixAttributes 
 
             case TOKcolon:
             case TOKlcurly:
-                error("Declaration expected, not '%s'",token.toChars());
+                error("declaration expected, not '%s'",token.toChars());
                 goto Lerror;
 
             case TOKrcurly:
             case TOKeof:
                 if (once)
-                    error("Declaration expected, not '%s'", token.toChars());
+                    error("declaration expected, not '%s'", token.toChars());
                 return decldefs;
 
             case TOKstatic:
@@ -852,7 +852,7 @@ Dsymbols *Parser::parseDeclDefs(int once, Dsymbol **pLastDecl, PrefixAttributes 
                 continue;
 
             default:
-                error("Declaration expected, not '%s'",token.toChars());
+                error("declaration expected, not '%s'",token.toChars());
             Lerror:
                 while (token.value != TOKsemicolon && token.value != TOKeof)
                     nextToken();
@@ -2154,7 +2154,7 @@ TemplateDeclaration *Parser::parseTemplateDeclaration(bool ismixin)
     nextToken();
     if (token.value != TOKidentifier)
     {
-        error("TemplateIdentifier expected following template");
+        error("identifier expected following template");
         goto Lerr;
     }
     id = token.ident;
@@ -2640,7 +2640,8 @@ Dsymbols *Parser::parseImport()
      L1:
         nextToken();
         if (token.value != TOKidentifier)
-        {   error("Identifier expected following import");
+        {
+            error("identifier expected following import");
             break;
         }
 
@@ -2660,7 +2661,8 @@ Dsymbols *Parser::parseImport()
             a->push(id);
             nextToken();
             if (token.value != TOKidentifier)
-            {   error("identifier expected following package");
+            {
+                error("identifier expected following package");
                 break;
             }
             id = token.ident;
@@ -2677,27 +2679,30 @@ Dsymbols *Parser::parseImport()
         if (token.value == TOKcolon)
         {
             do
-            {   Identifier *name;
-
+            {
                 nextToken();
                 if (token.value != TOKidentifier)
-                {   error("Identifier expected following :");
+                {
+                    error("identifier expected following :");
                     break;
                 }
                 Identifier *alias = token.ident;
+                Identifier *name;
                 nextToken();
                 if (token.value == TOKassign)
                 {
                     nextToken();
                     if (token.value != TOKidentifier)
-                    {   error("Identifier expected following %s=", alias->toChars());
+                    {
+                        error("identifier expected following %s=", alias->toChars());
                         break;
                     }
                     name = token.ident;
                     nextToken();
                 }
                 else
-                {   name = alias;
+                {
+                    name = alias;
                     alias = NULL;
                 }
                 s->addAlias(name, alias);
@@ -3408,7 +3413,7 @@ Dsymbols *Parser::parseDeclarations(bool autodecl, PrefixAttributes *pAttrs, con
                             addComment(s, comment);
                             if (token.value != TOKidentifier)
                             {
-                                error("Identifier expected following comma, not %s", token.toChars());
+                                error("identifier expected following comma, not %s", token.toChars());
                                 break;
                             }
                             if (peekNext() != TOKassign && peekNext() != TOKlparen)
@@ -3567,7 +3572,7 @@ L2:
                 if (init)
                 {
                     if (isThis)
-                        error("Cannot use syntax 'alias this = %s', use 'alias %s this' instead",
+                        error("cannot use syntax 'alias this = %s', use 'alias %s this' instead",
                            init->toChars(), init->toChars());
                     else
                         error("alias cannot have initializer");
@@ -3830,7 +3835,7 @@ Dsymbols *Parser::parseAutoDeclarations(StorageClass storageClass, const utf8_t 
                       skipParensIf(peek(&token), &tk) &&
                       tk->value == TOKassign))
                 {
-                    error("Identifier expected following comma");
+                    error("identifier expected following comma");
                     break;
                 }
                 addComment(s, comment);
@@ -5078,11 +5083,13 @@ Statement *Parser::parseStatement(int flags, const utf8_t** endPtr)
             else
             {
                 if (token.value != TOKidentifier)
-                {   error("Identifier expected following goto");
+                {
+                    error("identifier expected following goto");
                     ident = NULL;
                 }
                 else
-                {   ident = token.ident;
+                {
+                    ident = token.ident;
                     nextToken();
                 }
                 s = new GotoStatement(loc, ident);
@@ -6876,7 +6883,7 @@ Expression *Parser::parseUnaryExp()
                 nextToken();
                 if (token.value != TOKidentifier)
                 {
-                    error("Identifier expected following (type).");
+                    error("identifier expected following (type).");
                     return NULL;
                 }
                 e = typeDotIdExp(loc, t, token.ident);

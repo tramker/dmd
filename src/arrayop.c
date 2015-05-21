@@ -178,7 +178,7 @@ Expression *arrayOp(BinExp *e, Scope *sc)
     Type *tbn = tb->nextOf()->toBasetype();
     if (tbn->ty == Tvoid)
     {
-        e->error("Cannot perform array operations on void[] arrays");
+        e->error("cannot perform array operations on void[] arrays");
         return new ErrorExp();
     }
     if (!isArrayOpValid(e))
