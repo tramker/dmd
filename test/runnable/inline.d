@@ -707,6 +707,32 @@ pragma(inline)
 void test14753(string) { }
 
 /**********************************/
+// 15210
+
+struct BigInt15210 {}
+
+struct Tuple15210(Types...)
+{
+    Types field;
+
+    void opAssign(R)(R rhs)
+    {
+        field = rhs.field;
+    }
+}
+
+void test15210()
+{
+    alias X = Tuple15210!BigInt15210;
+
+    X[BigInt15210] cache;
+
+    auto x = X();
+
+    cache[BigInt15210()] = x;
+}
+
+/**********************************/
 
 int main()
 {
@@ -731,6 +757,7 @@ int main()
     test14306();
     test14754();
     test14606();
+    test15210();
 
     printf("Success\n");
     return 0;
