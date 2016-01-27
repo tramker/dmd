@@ -290,6 +290,9 @@ void ClassDeclaration::semantic(Scope *sc)
         }
     }
     assert(parent && !isAnonymous());
+
+    if (this->errors)
+        type = Type::terror;
     type = type->semantic(loc, sc);
 
     if (type->ty == Tclass && ((TypeClass *)type)->sym != this)
@@ -1334,6 +1337,9 @@ void InterfaceDeclaration::semantic(Scope *sc)
         parent = sc->parent;
     }
     assert(parent && !isAnonymous());
+
+    if (this->errors)
+        type = Type::terror;
     type = type->semantic(loc, sc);
 
     if (type->ty == Tclass && ((TypeClass *)type)->sym != this)

@@ -729,7 +729,7 @@ Dsymbol *StructDeclaration::syntaxCopy(Dsymbol *s)
 
 void StructDeclaration::semantic(Scope *sc)
 {
-    //printf("+StructDeclaration::semantic(this=%p, %s '%s', sizeok = %d)\n", this, parent->toChars(), toChars(), sizeok);
+    //printf("StructDeclaration::semantic(this=%p, %s '%s', sizeok = %d)\n", this, parent->toChars(), toChars(), sizeok);
 
     //static int count; if (++count == 20) halt();
 
@@ -738,6 +738,7 @@ void StructDeclaration::semantic(Scope *sc)
     unsigned dprogress_save = Module::dprogress;
     int errors = global.errors;
 
+    //printf("+StructDeclaration::semantic(this=%p, %s '%s', sizeok = %d)\n", this, parent->toChars(), toChars(), sizeok);
     Scope *scx = NULL;
     if (scope)
     {
@@ -752,6 +753,9 @@ void StructDeclaration::semantic(Scope *sc)
         parent = sc->parent;
     }
     assert(parent && !isAnonymous());
+
+    if (this->errors)
+        type = Type::terror;
     type = type->semantic(loc, sc);
 
     if (type->ty == Tstruct && ((TypeStruct *)type)->sym != this)
