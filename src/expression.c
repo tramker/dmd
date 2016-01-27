@@ -9705,10 +9705,14 @@ Expression *CastExp::semantic(Scope *sc)
         error("cannot cast %s to tuple type %s", e1->toChars(), to->toChars());
         return new ErrorExp();
     }
-    if (e1->op == TOKtemplate)
+
+    if (e1->type->ty != Tvoid ||
+        e1->op == TOKfunction && to->ty == Tvoid ||
+        e1->op == TOKtype ||
+        e1->op == TOKtemplate)
     {
-        error("cannot cast template %s to type %s", e1->toChars(), to->toChars());
-        return new ErrorExp();
+        if (e1->checkValue())
+            return new ErrorExp();
     }
 
     // cast(void) is used to mark e1 as unused, so it is safe
@@ -9803,8 +9807,8 @@ Expression *CastExp::semantic(Scope *sc)
             Type* tobn = tob->nextOf()->toBasetype();
             Type* t1bn = t1b->nextOf()->toBasetype();
             // If the struct is opaque we don't know about the struct members and the cast becomes unsafe
-            bool sfwrd = tobn->ty == Tstruct && !((StructDeclaration *)((TypeStruct *)tobn)->sym)->members ||
-                    t1bn->ty == Tstruct && !((StructDeclaration *)((TypeStruct *)t1bn)->sym)->members;
+            bool sfwrd = tobn->ty == Tstruct && !((TypeStruct *)tobn)->sym->members ||
+                         t1bn->ty == Tstruct && !((TypeStruct *)t1bn)->sym->members;
             if (!sfwrd && !tobn->hasPointers() &&
                 tobn->ty != Tfunction && t1bn->ty != Tfunction &&
                 tobn->size() <= t1bn->size() &&
