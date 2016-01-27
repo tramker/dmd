@@ -26,6 +26,7 @@
 
 Type *getTypeInfoType(Type *t, Scope *sc);
 TypeTuple *toArgTypes(Type *t);
+void unSpeculative(Scope *sc, RootObject *o);
 
 FuncDeclaration *StructDeclaration::xerreq;     // object.xopEquals
 FuncDeclaration *StructDeclaration::xerrcmp;    // object.xopCmp
@@ -91,17 +92,41 @@ void semanticTypeInfo(Scope *sc, Type *t)
         void visit(TypeStruct *t)
         {
             StructDeclaration *sd = t->sym;
+
+            /* Step 1: create TypeInfoDeclaration
+             */
+            if (!sc) // inline may request TypeInfo.
+            {
+                Scope scx;
+                scx.module = sd->getModule();
+                getTypeInfoType(t, &scx);
+            }
+            else
+            {
+                getTypeInfoType(t, sc);
+
+                // Bugzilla 15149, if the typeid operand type comes from a
+                // result of auto function, it may be yet speculative.
+                unSpeculative(sc, sd);
+            }
+            if (!sc || sc->minst)
+                sd->requestTypeInfo = true;
+
+            /* Step 2: If the TypeInfo generation requires sd.semantic3, run it later.
+             */
             if (!sd->members)
                 return;     // opaque struct
-            if (sd->semanticRun >= PASSsemantic3)
-                return;     // semantic3 will be done
             if (!sd->xeq && !sd->xcmp && !sd->postblit &&
                 !sd->dtor && !sd->xhash && !search_toString(sd))
                 return;     // none of TypeInfo-specific members
 
             // If the struct is in a non-root module, run semantic3 to get
             // correct symbols for the member function.
-            if (TemplateInstance *ti = sd->isInstantiated())
+            if (sd->semanticRun >= PASSsemantic3)
+            {
+                // semantic3 is already done
+            }
+            else if (TemplateInstance *ti = sd->isInstantiated())
             {
                 if (ti->minst && !ti->minst->isRoot())
                     Module::addDeferredSemantic3(sd);
@@ -114,18 +139,6 @@ void semanticTypeInfo(Scope *sc, Type *t)
                     Module::addDeferredSemantic3(sd);
                 }
             }
-
-            if (!sc)    // inline may request TypeInfo.
-            {
-                Scope scx;
-                scx.module = sd->getModule();
-                getTypeInfoType(t, &scx);
-            }
-            else
-                getTypeInfoType(t, sc);
-
-            if (!sc || sc->minst)
-                sd->requestTypeInfo = true;
         }
         void visit(TypeClass *t) { }
         void visit(TypeTuple *t)
@@ -141,6 +154,20 @@ void semanticTypeInfo(Scope *sc, Type *t)
             }
         }
     };
+
+    if (sc)
+    {
+        if (!sc->func)
+            return;
+        if (sc->intypeof)
+            return;
+        if (sc->flags & (SCOPEctfe | SCOPEcompile))
+            return;
+
+        if (!sc->minst)
+            return; // don't have to generate TypeInfo inside speculative scope
+    }
+
     FullTypeInfoVisitor v;
     v.sc = sc;
     t->accept(&v);
