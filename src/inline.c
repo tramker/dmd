@@ -1893,14 +1893,6 @@ static Expression *expandInline(FuncDeclaration *fd, FuncDeclaration *parent,
     ids.parent = parent;
     ids.fd = fd;
 
-    // When the function is actually expanded
-    if (TemplateInstance *ti = fd->isInstantiated())
-    {
-        // change ti to non-speculative root instance
-        if (!ti->minst)
-            ti->minst = ti->tempdecl->getModule()->importedFrom;
-    }
-
     if (ps)
         as = new Statements();
 
