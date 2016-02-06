@@ -582,17 +582,17 @@ void AggregateDeclaration::makeNested()
     Dsymbol *s = toParent2();
     if (!s)
         return;
-    AggregateDeclaration *ad = s->isAggregateDeclaration();
-    FuncDeclaration *fd = s->isFuncDeclaration();
     Type *t = NULL;
-    if (fd)
+    if (FuncDeclaration *fd = s->isFuncDeclaration())
     {
         enclosing = fd;
 
-        AggregateDeclaration *agg = fd->isMember2();
-        t = agg ? agg->handleType() : Type::tvoidptr;
+        /* Bugzilla 14422: If a nested class parent is a function, its
+         * context pointer (== `outer`) should be void* always.
+         */
+        t = Type::tvoidptr;
     }
-    else if (ad)
+    else if (AggregateDeclaration *ad = s->isAggregateDeclaration())
     {
         if (isClassDeclaration() && ad->isClassDeclaration())
         {
