@@ -3132,7 +3132,7 @@ Type *Parser::parseBasicType(bool dontLookDotIdents)
 
         default:
             error("basic type expected, not %s", token.toChars());
-            t = Type::tint32;
+            t = Type::terror;
             break;
     }
     return t;
