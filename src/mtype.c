@@ -5919,7 +5919,7 @@ MATCH TypeFunction::callMatch(Type *tthis, Expressions *args, int flag)
         }
 
         // Non-lvalues do not match ref or out parameters
-        if (p->storageClass & STCref)
+        if (p->storageClass & (STCref | STCout))
         {
             // Bugzilla 13783: Don't use toBasetype() to handle enum types.
             Type *ta = targ;
@@ -5928,6 +5928,9 @@ MATCH TypeFunction::callMatch(Type *tthis, Expressions *args, int flag)
 
             if (m && !arg->isLvalue())
             {
+                if (p->storageClass & STCout)
+                    goto Nomatch;
+
                 if (arg->op == TOKstring && tp->ty == Tsarray)
                 {
                     if (ta->ty != Tsarray)
@@ -5951,7 +5954,8 @@ MATCH TypeFunction::callMatch(Type *tthis, Expressions *args, int flag)
                     goto Nomatch;
             }
 
-            /* find most derived alias this type being matched.
+            /* Find most derived alias this type being matched.
+             * Bugzilla 15674: Allow on both ref and out parameters.
              */
             while (1)
             {
@@ -5967,16 +5971,6 @@ MATCH TypeFunction::callMatch(Type *tthis, Expressions *args, int flag)
              *  ref T[dim] <- an lvalue of const(T[dim]) argument
              */
             if (!ta->constConv(tp))
-                goto Nomatch;
-        }
-        else if (p->storageClass & STCout)
-        {
-            if (m && !arg->isLvalue())
-                goto Nomatch;
-
-            Type *targb = targ->toBasetype();
-            Type *tprmb = tprm->toBasetype();
-            if (!targb->constConv(tprmb))
                 goto Nomatch;
         }
         }
