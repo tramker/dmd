@@ -2294,6 +2294,28 @@ bool FuncDeclaration::functionSemantic3()
     return true;
 }
 
+/****************************************************
+ * Check that this function type is properly resolved.
+ * If not, report "forward reference error" and return true.
+ */
+bool FuncDeclaration::checkForwardRef(Loc loc)
+{
+	if (!functionSemantic())
+		return true;
+
+	/* No deco means the functionSemantic() call could not resolve
+	 * forward referenes in the type of this function.
+	 */
+	if (!type->deco)
+	{
+		bool inSemantic3 = (inferRetType && semanticRun >= PASSsemantic3);
+		::error(loc, "forward reference to %s'%s'",
+			(inSemantic3 ? "inferred return type of function " : ""), toChars());
+		return true;
+	}
+	return false;
+}
+
 VarDeclaration *FuncDeclaration::declareThis(Scope *sc, AggregateDeclaration *ad)
 {
     if (ad && !isFuncLiteralDeclaration())

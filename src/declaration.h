@@ -644,6 +644,7 @@ public:
     const char *kind();
     FuncDeclaration *isUnique();
     bool checkNestedReference(Scope *sc, Loc loc);
+    bool checkForwardRef(Loc loc);
     bool needsClosure();
     bool hasNestedFrameRefs();
     void buildResultVar(Scope *sc, Type *tret);

@@ -2019,6 +2019,16 @@ Expression *castTo(Expression *e, Scope *sc, Type *t)
                         }
                     }
                 }
+
+                if (FuncDeclaration* f = isFuncAddress(e))
+                {
+                    if (f->checkForwardRef(e->loc))
+                    {
+                        result = new ErrorExp();
+                        return;
+                    }
+                }
+
                 visit((Expression *)e);
             }
             result->type = t;
@@ -2238,6 +2248,16 @@ Expression *castTo(Expression *e, Scope *sc, Type *t)
                     return;
                 }
             }
+
+            if (FuncDeclaration* f = isFuncAddress(e))
+            {
+                if (f->checkForwardRef(e->loc))
+                {
+                    result = new ErrorExp();
+                    return;
+                }
+            }
+
             visit((Expression *)e);
         }
 
@@ -2274,6 +2294,16 @@ Expression *castTo(Expression *e, Scope *sc, Type *t)
                             e->error("%s", msg);
                     }
                 }
+
+                if (FuncDeclaration* f = isFuncAddress(e))
+                {
+                    if (f->checkForwardRef(e->loc))
+                    {
+                        result = new ErrorExp();
+                        return;
+                    }
+                }
+
                 visit((Expression *)e);
             }
             else

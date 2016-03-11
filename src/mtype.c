@@ -7146,6 +7146,19 @@ void TypeTypeof::resolve(Loc loc, Scope *sc, Expression **pe, Type **pt, Dsymbol
                 goto Lerr;
             }
         }
+
+		if (FuncDeclaration* f = exp->op == TOKvar ? ((VarExp*)exp)->var->isFuncDeclaration()
+				: exp->op == TOKdotvar ? ((DotVarExp*)exp)->var->isFuncDeclaration() : NULL)
+		{
+			if (f->checkForwardRef(loc))
+				goto Lerr;
+		}
+		if (FuncDeclaration* f = isFuncAddress(exp))
+        {
+			if (f->checkForwardRef(loc))
+				goto Lerr;
+		}
+
         t = exp->type;
         if (!t)
         {

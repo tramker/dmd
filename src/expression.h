@@ -99,6 +99,7 @@ Expression *typeCombine(BinExp *be, Scope *sc);
 Expression *inferType(Expression *e, Type *t, int flag = 0);
 Expression *semanticTraits(TraitsExp *e, Scope *sc);
 Type *getIndirection(Type *t);
+FuncDeclaration* isFuncAddress(Expression *e, bool *hasOverloads = NULL);
 
 Expression *checkGC(Scope *sc, Expression *e);
 

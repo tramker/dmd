@@ -826,6 +826,11 @@ Statement *ExpStatement::semantic(Scope *sc)
         exp = exp->semantic(sc);
         exp = resolveProperties(sc, exp);
         exp = exp->addDtorHook(sc);
+        if (FuncDeclaration* f = isFuncAddress(exp))
+        {
+            if (f->checkForwardRef(exp->loc))
+                exp = new ErrorExp();
+        }
         discardValue(exp);
         exp = exp->optimize(WANTvalue);
         exp = checkGC(sc, exp);
@@ -3902,6 +3907,11 @@ Statement *ReturnStatement::semantic(Scope *sc)
         {
             // don't make error for void expression
             if (exp->checkValue())
+                exp = new ErrorExp();
+        }
+        if (FuncDeclaration* f = isFuncAddress(exp))
+        {
+            if (fd->inferRetType && f->checkForwardRef(exp->loc))
                 exp = new ErrorExp();
         }
         if (checkNonAssignmentArrayOp(exp))
