@@ -11816,7 +11816,18 @@ Expression *AssignExp::semantic(Scope *sc)
                 e2x = e2x->castTo(sc, e1->type->constOf());
         }
         else
-            e2x = e2x->implicitCastTo(sc, e1->type);
+        {
+            /* Bugzilla 15778: A string literal has an array type of immutable
+             * elements by default, and normally it cannot be convertible to
+             * array type of mutable elements. But for element-wise assignment,
+             * elements need to be const at best. So we should give a chance
+             * to change code unit size for polysemous string literal.
+             */
+            if (e2x->op == TOKstring)
+                e2x = e2x->implicitCastTo(sc, e1->type->constOf());
+            else
+                e2x = e2x->implicitCastTo(sc, e1->type);
+        }
     }
     else
     {
