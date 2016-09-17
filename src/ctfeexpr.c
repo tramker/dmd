@@ -1788,14 +1788,14 @@ UnionExp ctfeCat(Type *type, Expression *e1, Expression *e2)
         t1->nextOf()->equals(t2->nextOf()))
     {
         //  [ e1 ] ~ null ----> [ e1 ].dup
-        ue = paintTypeOntoLiteralCopy(type, copyLiteral(e1).exp());
+        ue = paintTypeOntoLiteralCopy(type, copyLiteral(e1).copy());
         return ue;
     }
     if (e1->op == TOKnull && e2->op == TOKarrayliteral &&
         t1->nextOf()->equals(t2->nextOf()))
     {
         //  null ~ [ e2 ] ----> [ e2 ].dup
-        ue = paintTypeOntoLiteralCopy(type, copyLiteral(e2).exp());
+        ue = paintTypeOntoLiteralCopy(type, copyLiteral(e2).copy());
         return ue;
     }
     ue = Cat(type, e1, e2);
