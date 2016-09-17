@@ -3922,6 +3922,9 @@ Statement *ReturnStatement::semantic(Scope *sc)
         if (exp->op == TOKcall)
             exp = valueNoDtor(exp);
 
+        if (e0)
+            e0 = e0->optimize(WANTvalue);
+
         /* Void-return function can have void typed expression
          * on return statement.
          */
