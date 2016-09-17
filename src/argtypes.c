@@ -31,8 +31,12 @@
  * This breaks a type down into 'simpler' types that can be passed to a function
  * in registers, and returned in registers.
  * It's highly platform dependent.
- * Returning a tuple of zero length means the type cannot be passed/returned in registers.
- */
+ * Params:
+  *      t = type to break down
+  * Returns:
+  *      tuple of types, each element can be passed in a register.
+  *      A tuple of zero length means the type cannot be passed/returned in registers.
+  */
 
 TypeTuple *toArgTypes(Type *t)
 {
@@ -203,6 +207,12 @@ TypeTuple *toArgTypes(Type *t)
 
         /*************************************
          * This merges two types into an 8byte type.
+         * Params:
+         *      t1 = first type (can be null)
+         *      t2 = second type (can be null)
+         *      offset2 = offset of t2 from start of t1
+         * Returns:
+         *      type that encompasses both t1 and t2, null if cannot be done
          */
 
         static Type *argtypemerge(Type *t1, Type *t2, unsigned offset2)
@@ -255,14 +265,9 @@ TypeTuple *toArgTypes(Type *t)
                     case 4:
                         t = Type::tint32;
                         break;
-                    case 5:
-                    case 6:
-                    case 7:
-                    case 8:
+                    default:
                         t = Type::tint64;
                         break;
-                    default:
-                        assert(0);
                 }
             }
             return t;

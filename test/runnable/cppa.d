@@ -751,6 +751,51 @@ void test14200()
 }
 
 /****************************************/
+// 15455
+
+struct X6
+{
+    ushort a;
+    ushort b;
+    ubyte c;
+    ubyte d;
+}
+
+static assert(X6.sizeof == 6);
+
+struct X8
+{
+    ushort a;
+    X6 b;
+}
+
+static assert(X8.sizeof == 8);
+
+void test15455a(X8 s)
+{
+    assert(s.a == 1);
+    assert(s.b.a == 2);
+    assert(s.b.b == 3);
+    assert(s.b.c == 4);
+    assert(s.b.d == 5);
+}
+
+extern (C++) void test15455b(X8 s);
+
+void test15455()
+{
+    X8 s;
+
+    s.a = 1;
+    s.b.a = 2;
+    s.b.b = 3;
+    s.b.c = 4;
+    s.b.d = 5;
+    test15455a(s);
+    test15455b(s);
+}
+
+/****************************************/
 
 void main()
 {
@@ -781,6 +826,7 @@ void main()
     foo13337(S13337());
     test14195();
     test14200();
+    test15455();
 
     printf("Success\n");
 }
