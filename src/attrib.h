@@ -136,6 +136,7 @@ public:
     void semantic(Scope *sc);
     void setFieldOffset(AggregateDeclaration *ad, unsigned *poffset, bool isunion);
     const char *kind();
+    void setScope(Scope *sc);
     void accept(Visitor *v) { v->visit(this); }
 };
 

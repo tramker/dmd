@@ -770,6 +770,12 @@ const char *AnonDeclaration::kind()
     return (isunion ? "anonymous union" : "anonymous struct");
 }
 
+void AnonDeclaration::setScope(Scope *sc)
+{
+    AttribDeclaration::setScope(sc);
+    alignment = sc->structalign;
+}
+
 /********************************* PragmaDeclaration ****************************/
 
 PragmaDeclaration::PragmaDeclaration(Loc loc, Identifier *ident, Expressions *args, Dsymbols *decl)
