@@ -269,6 +269,11 @@ void test16747() @safe
 
 /********************************************/
 
+byte typify13(T)(byte val) { return val; }
+alias INT8_C13  = typify13!byte;
+
+/********************************************/
+
 void main()
 {
     test1();
