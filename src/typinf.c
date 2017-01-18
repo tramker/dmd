@@ -190,7 +190,17 @@ bool isSpeculativeType(Type *t)
                 //assert(!sd->inNonRoot() || sd->requestTypeInfo);  // valid?
             }
         }
-        void visit(TypeClass *t) { }
+        void visit(TypeClass *t)
+        {
+            ClassDeclaration *sd = t->sym;
+            if (TemplateInstance *ti = sd->isInstantiated())
+            {
+                if (!ti->needsCodegen() && !ti->minst)
+                {
+                    result |= true;
+                }
+            }
+        }
         void visit(TypeTuple *t)
         {
             if (t->arguments)
