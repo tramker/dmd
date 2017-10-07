@@ -148,6 +148,7 @@ class Lexer
     __gshared OutBuffer stringbuffer;
 
     Loc scanloc;            // for error messages
+    Loc prevloc;            // location of token before current
 
     const(char)* base;      // pointer to start of buffer
     const(char)* end;       // past end of buffer
@@ -221,6 +222,7 @@ class Lexer
 
     final TOK nextToken()
     {
+        prevloc = token.loc;
         if (token.next)
         {
             Token* t = token.next;
