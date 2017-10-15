@@ -1274,6 +1274,7 @@ void doswitch(block *b)
     bool csseg = false;
 #endif
 
+    //printf("doswitch(%d)\n", b->BC);
     elem *e = b->Belem;
     elem_debug(e);
     code *cc = docommas(&e);
@@ -1434,7 +1435,7 @@ void doswitch(block *b)
         if (vmax - vmin != REGMASK)     /* if there is a maximum        */
         {                               /* CMP reg,vmax-vmin            */
             c = genc2(c,0x81,modregrm(3,7,reg),vmax-vmin);
-            if (I64)
+            if (I64 && sz == 8)
                 code_orrex(c, REX_W);
             genjmp(c,JA,FLblock,b->nthSucc(0));  /* JA default   */
         }
@@ -1442,7 +1443,8 @@ void doswitch(block *b)
         {
             if (!vmin)
             {   // Need to clear out high 32 bits of reg
-                c = genmovreg(c,reg,reg);                       // MOV reg,reg
+                // Use 8B instead of 89, as 89 will be optimized away as a NOP
+                genregs(c,0x8B,reg,reg);                 // MOV reg,reg
             }
             if (config.flags3 & CFG3pic || config.exe == EX_WIN64)
             {
