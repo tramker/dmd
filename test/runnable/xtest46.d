@@ -7890,6 +7890,22 @@ void test16466()
 }
 
 /***************************************************/
+// https://issues.dlang.org/show_bug.cgi?id=17915
+
+void test17915()
+{
+    static class MyClass
+    {
+        S17915!MyClass m_member;
+    }
+}
+
+struct S17915(T)
+{
+    T owner;
+}
+
+/***************************************************/
 
 int main()
 {
@@ -8207,6 +8223,7 @@ int main()
     test15638();
     test16233();
     test16466();
+    test17915();
 
     printf("Success\n");
     return 0;
