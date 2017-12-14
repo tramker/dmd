@@ -878,6 +878,13 @@ extern (C++) class ClassDeclaration : AggregateDeclaration
         if (!determineFields())
         {
             assert(type == Type.terror);
+            if (type.ty != Terror)
+            {
+                error(loc, "circular or forward reference");
+                errors = true;
+                type = Type.terror;
+            }
+
             sc2.pop();
             return;
         }
@@ -971,6 +978,20 @@ extern (C++) class ClassDeclaration : AggregateDeclaration
         //members.print();
 
         sc2.pop();
+
+        /* isAbstract() is undecidable in some cases because of circular dependencies.
+         * Now that semantic is finished, get a definitive result, and error if it is not the same.
+         */
+        if (isabstract != ABSfwdref)    // if evaluated it before completion
+        {
+            const isabstractsave = isabstract;
+            isabstract = ABSfwdref;
+            isAbstract();               // recalculate
+            if (isabstract != isabstractsave)
+            {
+                error("cannot infer `abstract` attribute due to circular dependencies");
+            }
+        }
 
         if (type.ty == Tclass && (cast(TypeClass)type).sym != this)
         {
@@ -1423,8 +1444,20 @@ extern (C++) class ClassDeclaration : AggregateDeclaration
      */
     final bool isAbstract()
     {
+        enum log = false;
         if (isabstract != ABSfwdref)
             return isabstract == ABSyes;
+
+        if (log) printf("isAbstract(%s)\n", toChars());
+
+        bool no()  { if (log) printf("no\n");  isabstract = ABSno;  return false; }
+        bool yes() { if (log) printf("yes\n"); isabstract = ABSyes; return true;  }
+
+        if (storage_class & STCabstract || _scope && _scope.stc & STCabstract)
+            return yes();
+
+        if (errors)
+            return no();
 
         /* Bugzilla 11169: Resolve forward references to all class member functions,
          * and determine whether this class is abstract.
@@ -1437,9 +1470,6 @@ extern (C++) class ClassDeclaration : AggregateDeclaration
             if (fd.storage_class & STCstatic)
                 return 0;
 
-            if (fd._scope)
-                fd.semantic(null);
-
             if (fd.isAbstract())
                 return 1;
             return 0;
@@ -1450,26 +1480,59 @@ extern (C++) class ClassDeclaration : AggregateDeclaration
             auto s = (*members)[i];
             if (s.apply(&func, cast(void*)this))
             {
-                isabstract = ABSyes;
-                return true;
+                return yes();
             }
         }
 
-        /* Iterate inherited member functions and check their abstract attribute.
+        /* If the base class is not abstract, then this class cannot
+         * be abstract.
          */
-        for (size_t i = 1; i < vtbl.dim; i++)
+        if (!baseClass || !baseClass.isAbstract())
+            return no();
+
+        /* If any abstract functions are inherited, but not overridden,
+         * then the class is abstract. Do this by checking the vtbl[].
+         * Need to do semantic() on class to fill the vtbl[].
+         */
+        this.semantic(null);
+
+        /* The next line should work, but does not because when ClassDeclaration.semantic()
+         * is called recursively it can set PASSsemanticdone without finishing it.
+         */
+        //if (semanticRun < PASSsemanticdone)
+        {
+            /* Could not complete semantic(). Try running semantic() on
+             * each of the virtual functions,
+             * which will fill in the vtbl[] overrides.
+             */
+            extern (C++) static int virtualSemantic(Dsymbol s, void* param)
+            {
+                auto fd = s.isFuncDeclaration();
+                if (fd && !(fd.storage_class & STCstatic))
+                    fd.semantic(null);
+                return 0;
+            }
+
+            for (size_t i = 0; i < members.dim; i++)
+            {
+                auto s = (*members)[i];
+                s.apply(&virtualSemantic, cast(void*)this);
+            }
+        }
+
+        /* Finally, check the vtbl[]
+         */
+        foreach (i; 1 .. vtbl.dim)
         {
             auto fd = vtbl[i].isFuncDeclaration();
-            //if (fd) printf("\tvtbl[%d] = [%s] %s\n", i, fd.loc.toChars(), fd.toChars());
+            //if (fd) printf("\tvtbl[%d] = [%s] %s\n", i, fd.loc.toChars(), fd.toPrettyChars());
             if (!fd || fd.isAbstract())
             {
-                isabstract = ABSyes;
-                return true;
+                return yes();
             }
         }
 
-        isabstract = ABSno;
-        return false;
+        return no();
     }
 
     /****************************************
