@@ -3356,7 +3356,7 @@ else
         }
         if (e0)
         {
-            if (e0.op == TOK.declaration)
+            if (e0.op == TOK.declaration || e0.op == TOK.comma)
             {
                 rs.exp = Expression.combine(e0, rs.exp);
             }
